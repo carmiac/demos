@@ -32,7 +32,13 @@ public:
       rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
   {}
 
-  void log_wall_timer_callback()
+  void timer_callback()
+  {
+    RCLCPP_INFO(get_logger(), "Hello, Lifecycle Timer!");
+  }
+
+
+  void wall_timer_callback()
   {
     RCLCPP_INFO(get_logger(), "Hello, Lifecycle Wall Timer!");
   }
@@ -40,15 +46,19 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_configure(const rclcpp_lifecycle::State &)
   {
+    timer_ = this->create_lifecycle_timer(
+      1s,
+      std::bind(&LifecycleTimerNode::timer_callback, this));
     wall_timer_ = this->create_lifecycle_wall_timer(
       1s,
-      std::bind(&LifecycleTimerNode::log_wall_timer_callback, this));
+      std::bind(&LifecycleTimerNode::wall_timer_callback, this));
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_cleanup(const rclcpp_lifecycle::State &)
   {
+    timer_.reset();
     wall_timer_.reset();
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
@@ -56,12 +66,14 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_shutdown(const rclcpp_lifecycle::State &)
   {
+    timer_.reset();
     wall_timer_.reset();
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 
 private:
   std::shared_ptr<rclcpp::TimerBase> wall_timer_;
+  std::shared_ptr<rclcpp::TimerBase> timer_;
 };
 
 
