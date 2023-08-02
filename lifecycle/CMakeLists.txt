@@ -41,10 +41,18 @@ ament_target_dependencies(lifecycle_service_client
   "rclcpp"
 )
 
+add_executable(lifecycle_timer
+  src/lifecycle_timer.cpp)
+ament_target_dependencies(lifecycle_timer
+  "rclcpp"
+  "rclcpp_lifecycle"
+)
+
 install(TARGETS
   lifecycle_talker
   lifecycle_listener
   lifecycle_service_client
+  lifecycle_timer
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
